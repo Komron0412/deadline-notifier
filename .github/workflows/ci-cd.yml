@@ -1,9 +1,14 @@
 name: Run Selenium Java application built with Maven
 
 on:
-  workflow_dispatch: # Allows manual trigger from GitHub Actions
+#   push: # commment for easy access
+#     branches:
+#       - master
+#   pull_request:
+#     branches:
+#       - master
   schedule:
-    - cron: "0 1 * * *" # Runs daily at 1 AM UTC (6-7 AM in your timezone)
+    - cron: "0 1 * * *" # it will be 6~7 am in our timezone
 
 jobs:
   run-selenium-script:
