@@ -1,8 +1,6 @@
 name: Run Selenium Java application built with Maven
 
 on:
-  workflow_dispatch: 
-# Allows manual trigger via API or GitHub UI
 #   push: # commment for easy access
 #     branches:
 #       - master
