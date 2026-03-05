@@ -79,8 +79,10 @@ public class DeadlineNotifier {
             int count = 1; // index for for-each loop and will be to print the order
 
             for (WebElement event : driver.findElements(By.className("card"))) {
+                boolean notActualDeadline = event.findElement(By.tagName("span")).getText().startsWith("Today, 00:") &&
+                        !event.findElement(By.tagName("span")).getText().contains("»");
                 if (!event.findElement(By.tagName("img")).getAttribute("alt").equals("Course event")
-                        && !event.findElement(By.tagName("span")).getText().startsWith("Today, 00:")) {
+                        && !notActualDeadline) {
                     if (!isDeadlineMessageCalled) {
                         System.out.println("\n" + Constants.DEADLINE_MESSAGE);
                         isDeadlineMessageCalled = true;
@@ -140,22 +142,36 @@ public class DeadlineNotifier {
 
         timeOfDeadline = event.findElement(By.tagName("span")).getText();
 
-        if (timeOfDeadline.contains("»")) {
+        // logic removed on October 5, 2025 and readded on October 15, 2025
+        if (timeOfDeadline.contains("»") && !timeOfDeadline.startsWith("Today")) {
             String[] deadlineParts = timeOfDeadline.split("»");
             timeOfDeadline = deadlineParts[1].trim(); // take the second part after »
         }
 
         if (timeOfDeadline.startsWith("Tomorrow")) {
             if (timeOfDeadline.split(",")[1].startsWith(" 00:")) {
-                timeOfDeadline = timeOfDeadline.replace("Tomorrow,", "At the next" + timeOfDeadline.split(",")[1]);
+                timeOfDeadline = timeOfDeadline.replace("Tomorrow,", "At the next");
                 timeOfDeadline = timeOfDeadline + " 🔴";
             } else {
                 timeOfDeadline = timeOfDeadline.replace(",", " at");
                 timeOfDeadline = timeOfDeadline + " 🟡";
             }
         } else if (timeOfDeadline.startsWith("Today")) {
-            String[] parts = timeOfDeadline.split(",");
-            timeOfDeadline = parts[0] + " at" + parts[1] + " 🔴";
+            if (timeOfDeadline.contains("»")) {
+                String[] parts = timeOfDeadline.split("»");
+                if (parts[1].length() == 6) { // means only for today
+                    timeOfDeadline = "Today at" + parts[1] + " 🔴";
+                } else {
+                    if (parts[1].contains("Tomorrow")) {
+                        timeOfDeadline = parts[1] + " 🟡";
+                    } else {
+                        timeOfDeadline = parts[1] + " 🟢";
+                    }
+                }
+            } else {
+                String[] parts = timeOfDeadline.split(",");
+                timeOfDeadline = parts[0] + " at" + parts[1] + " 🔴";
+            }
         } else {
             String[] parts = timeOfDeadline.split(",");
             timeOfDeadline = parts[0] + "," + parts[1] + " at" + parts[2] + " 🟢";
